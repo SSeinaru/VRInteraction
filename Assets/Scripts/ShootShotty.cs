@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -7,7 +7,7 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using static UnityEngine.Rendering.GPUSort;
 
 [AddComponentMenu("Nokobot/Modern Guns/Simple Shoot")]
-public class SimpleShoot : MonoBehaviour
+public class ShootShotty : MonoBehaviour
 {
     [Header("Prefab Refrences")]
     public GameObject bulletPrefab;
@@ -20,18 +20,20 @@ public class SimpleShoot : MonoBehaviour
     [SerializeField] private Transform casingExitLocation;
 
     [Header("Settings")]
-    [Tooltip("Specify time to destory the casing object")] [SerializeField] private float destroyTimer = 2f;
-    [Tooltip("Bullet Speed")] [SerializeField] private float shotPower = 500f;
-    [Tooltip("Casing Ejection Speed")] [SerializeField] private float ejectPower = 150f;
+    [Tooltip("Specify time to destory the casing object")][SerializeField] private float destroyTimer = 2f;
+    [Tooltip("Bullet Speed")][SerializeField] private float shotPower = 500f;
+    [Tooltip("Casing Ejection Speed")][SerializeField] private float ejectPower = 150f;
 
-    [SerializeField] private AudioSource source;
-    [SerializeField] private AudioClip fireSound;
-    [SerializeField] private AudioClip reload;
-    [SerializeField] private AudioClip noBullets;
+    public AudioSource source;
+    public AudioClip fireSound;
+    public AudioClip reload;
+    public AudioClip noBullets;
 
-    private bool hasSlide = true;
-    [SerializeField] private Magazine magazine;
-    [SerializeField] private XRSocketInteractor magazineSocket;
+    private bool hasPumped = true;
+    public Shell shell;
+    public int currentAmmo = 2;
+    public int maxAmmo = 5;
+    public XRSocketInteractor ShellSocket;
 
     void Start()
     {
@@ -41,13 +43,15 @@ public class SimpleShoot : MonoBehaviour
         if (gunAnimator == null)
             gunAnimator = GetComponentInChildren<Animator>();
 
-        magazineSocket.selectEntered.AddListener(AddMagazine);
-        magazineSocket.selectExited.AddListener(RemoveMagazine);
+
+
+        ShellSocket.selectEntered.AddListener(AddShell);
+        ShellSocket.selectExited.AddListener(RemoveShell);
     }
 
     public void PullTrigger()
     {
-        if (magazine && magazine.bulletAmount > 0 && hasSlide)
+        if (shell && shell.bulletAmount > 0 && hasPumped)
             gunAnimator.SetTrigger("Fire");
         else
             source.PlayOneShot(noBullets);
@@ -56,7 +60,7 @@ public class SimpleShoot : MonoBehaviour
     //This function creates the bullet behavior
     void Shoot()
     {
-        magazine.bulletAmount--;
+        currentAmmo--;
 
         source.PlayOneShot(fireSound);
 
@@ -97,24 +101,33 @@ public class SimpleShoot : MonoBehaviour
         //Destroy casing after X seconds
         Destroy(tempCasing, destroyTimer);
     }
-
-    public void AddMagazine(SelectEnterEventArgs interactable)
+    public void AddShell(SelectEnterEventArgs interactable)
     {
-        magazine = interactable.interactableObject.transform.GetComponent<Magazine>();
+        shell = interactable.interactableObject.transform.GetComponent<Shell>();
         source.PlayOneShot(reload);
-        hasSlide = false;
+        hasPumped = false;
     }
 
-    public void RemoveMagazine(SelectExitEventArgs interactable)
+    public void RemoveShell(SelectExitEventArgs interactable)
     {
-        magazine = null;
+        shell = null;
         source.PlayOneShot(reload);
     }
 
-    public void Slide()
+    public void Pump()
     {
-        hasSlide = true;
+        hasPumped = true;
         source.PlayOneShot(reload);
     }
+
+
+    public void AddBullets()
+    {
+        if(currentAmmo >= maxAmmo)
+        {
+            currentAmmo++;
+        }
+    }
+
 
 }
