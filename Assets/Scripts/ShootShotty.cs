@@ -45,16 +45,17 @@ public class ShootShotty : MonoBehaviour
 
 
 
-        ShellSocket.selectEntered.AddListener(AddShell);
-        ShellSocket.selectExited.AddListener(RemoveShell);
+        //ShellSocket.selectEntered.AddListener(AddShell);
+        //ShellSocket.selectExited.AddListener(RemoveShell);
     }
 
     public void PullTrigger()
     {
-        if (shell && shell.bulletAmount > 0 && hasPumped)
-            gunAnimator.SetTrigger("Fire");
-        else
-            source.PlayOneShot(noBullets);
+        gunAnimator.SetTrigger("Fire");
+        //if (shell && shell.bulletAmount > 0 && hasPumped)
+            
+        //else
+            //source.PlayOneShot(noBullets);
     }
 
     //This function creates the bullet behavior
@@ -123,6 +124,7 @@ public class ShootShotty : MonoBehaviour
 
     public void AddBullets()
     {
+        
         if(currentAmmo >= maxAmmo)
         {
             currentAmmo++;
